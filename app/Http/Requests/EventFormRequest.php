@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use App\Models\Event;
 
 class EventFormRequest extends FormRequest
 {
@@ -21,13 +22,28 @@ class EventFormRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            /*
-            |--------------------------------------------------------------------------
-            | Validasi data event
-            |--------------------------------------------------------------------------
-            */
+        $event = $this->route('event');
 
+        $dateRules = [
+            'required',
+            'date',
+        ];
+
+        /*
+        * Pada create atau event yang belum memiliki penjualan,
+        * tanggal wajib berada setelah waktu sekarang.
+        *
+        * Event yang sudah memiliki penjualan mempertahankan tanggal lama.
+        * Pemeriksaan perubahan tanggal dilakukan lagi di controller.
+        */
+        if (
+            !$event instanceof Event ||
+            !$event->hasSales()
+        ) {
+            $dateRules[] = 'after:now';
+        }
+
+        return [
             'judul' => [
                 'required',
                 'string',
@@ -51,11 +67,7 @@ class EventFormRequest extends FormRequest
                 'exists:kategoris,id',
             ],
 
-            'tanggal_waktu' => [
-                'required',
-                'date',
-                'after:now',
-            ],
+            'tanggal_waktu' => $dateRules,
 
             'gambar' => [
                 'nullable',
@@ -63,12 +75,6 @@ class EventFormRequest extends FormRequest
                 'mimes:jpg,jpeg,png',
                 'max:2048',
             ],
-
-            /*
-            |--------------------------------------------------------------------------
-            | Validasi array tiket
-            |--------------------------------------------------------------------------
-            */
 
             'tikets' => [
                 'required',
