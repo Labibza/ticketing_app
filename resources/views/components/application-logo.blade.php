@@ -1,0 +1,1 @@
+<img src="{{ asset('assets/images/logo_bengkod.svg') }}" {{ $attributes->merge(['class' => 'h-9 w-auto']) }} alt="BengTix Logo">
