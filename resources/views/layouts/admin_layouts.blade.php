@@ -30,6 +30,40 @@
                     </li>
 
                     <li>
+                        <a
+                            href="{{ route('admin.events.index') }}"
+                            class="flex items-center px-4 py-3
+                                rounded-lg transition-colors
+                                {{
+                                        request()->routeIs('admin.events.*')
+                                            ? 'bg-blue-50 text-blue-700'
+                                            : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700'
+                                }}"
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                class="w-5 h-5 mr-3"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="M8 7V3m8 4V3M5 11h14M5 5h14
+                                    a2 2 0 0 1 2 2v12
+                                    a2 2 0 0 1-2 2H5
+                                    a2 2 0 0 1-2-2V7
+                                    a2 2 0 0 1 2-2z"
+                                />
+                            </svg>
+
+                            Manajemen Event
+                        </a>
+                    </li>
+
+                    <li>
                         <a href="{{ route('dashboard') }}"
                            class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors {{ request()->routeIs('categories.*') ? 'bg-blue-50 text-blue-600' : '' }}">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" class="w-5 h-5 mr-3">
