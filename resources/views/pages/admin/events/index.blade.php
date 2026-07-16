@@ -264,13 +264,10 @@
                                         <img
                                             src="{{ $event->image_url }}"
                                             alt="{{ $event->judul }}"
-                                            class="w-16 h-16
-                                                   object-cover rounded-lg
-                                                   border border-gray-200"
+                                            class="w-16 h-16 object-cover rounded-lg"
                                             onerror="
                                                 this.onerror = null;
-                                                this.src =
-                                                '{{ asset('storage/konser.jpg') }}';
+                                                this.src = '{{ asset('storage/konser.jpg') }}';
                                             "
                                         >
                                     </td>

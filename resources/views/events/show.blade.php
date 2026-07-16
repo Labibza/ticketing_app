@@ -16,9 +16,10 @@
                             }
                         @endphp
 
-                        <img src="{{ $imageUrl }}"
-                             alt="{{ $event->judul ?? $event->nama }}"
-                             class="w-full h-96 object-cover rounded-lg shadow-md">
+                        <img
+                            src="{{ Storage::disk('public')->url($event->gambar) }}"
+                            alt="{{ $event->judul }}"
+                        >
                     </div>
 
                     <!-- Event Details -->
@@ -117,6 +118,45 @@
                     <p class="text-gray-600">Belum ada tiket yang tersedia untuk event ini.</p>
                 </div>
             </div>
+        @endif
+
+        {{-- Related Events --}}
+        @if ($relatedEvents->isNotEmpty())
+            <section class="mt-12">
+                <div class="mb-6">
+                    <p class="text-sm font-semibold text-blue-900">
+                        REKOMENDASI LAINNYA
+                    </p>
+
+                    <h2 class="text-3xl font-bold">
+                        Event Terkait
+                    </h2>
+
+                    <p class="text-gray-500 mt-1">
+                        Event lain dalam kategori
+                        {{ $event->kategori?->nama ?? 'yang sama' }}.
+                    </p>
+                </div>
+
+                <div
+                    class="grid grid-cols-1 sm:grid-cols-2
+                        lg:grid-cols-4 gap-6"
+                >
+                    @foreach ($relatedEvents as $relatedEvent)
+                        <x-event-card
+                            :title="$relatedEvent->judul"
+                            :date="$relatedEvent->tanggal_waktu"
+                            :location="$relatedEvent->lokasi"
+                            :price="$relatedEvent->tikets_min_harga"
+                            :image="$relatedEvent->image_url"
+                            :href="route(
+                                'events.show',
+                                $relatedEvent
+                            )"
+                        />
+                    @endforeach
+                </div>
+            </section>
         @endif
 
         <!-- Back Button -->

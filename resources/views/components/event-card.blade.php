@@ -18,13 +18,42 @@
         ? \Carbon\Carbon::parse($date)->locale('id')->translatedFormat('d F Y, H:i')
         : 'Tanggal tidak tersedia';
 
-    // Safe image URL: use external URL if provided, otherwise use storage URL
-    if ($image && filter_var($image, FILTER_VALIDATE_URL)) {
+        
+    $image = trim((string) ($image ?? ''));
+
+    if (
+        $image !== '' &&
+        filter_var($image, FILTER_VALIDATE_URL)
+    ) {
+        /*
+         * Gambar berasal dari URL eksternal.
+         */
         $imageUrl = $image;
     } else {
-        // Use provided image if it exists and file is found, otherwise use default
-        $imageName = (!empty($image) && file_exists(public_path('storage/' . $image))) ? $image : 'konser.jpg';
-        $imageUrl = asset('storage/' . $imageName);
+        /*
+         * Normalisasi data lama, misalnya:
+         * storage/events/gambar.jpg
+         * menjadi:
+         * events/gambar.jpg
+         */
+        $imagePath = preg_replace(
+            '#^/?storage/#',
+            '',
+            $image
+        );
+
+        $disk = \Illuminate\Support\Facades\Storage::disk(
+            'public'
+        );
+
+        if (
+            $imagePath !== '' &&
+            $disk->exists($imagePath)
+        ) {
+            $imageUrl = $disk->url($imagePath);
+        } else {
+            $imageUrl = $disk->url('konser.jpg');
+        }
     }
 @endphp
 

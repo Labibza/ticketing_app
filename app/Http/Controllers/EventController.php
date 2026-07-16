@@ -120,68 +120,39 @@ class EventController extends Controller
         $validated = $request->validated();
 
         /*
-         * Default gambar digunakan jika admin tidak mengunggah gambar.
-         */
+        * Default jika admin tidak mengunggah gambar.
+        */
         $imagePath = 'konser.jpg';
-        $uploadedImagePath = null;
 
         if ($request->hasFile('gambar')) {
-            $uploadedImagePath = $request
+            $imagePath = $request
                 ->file('gambar')
                 ->store('events', 'public');
-
-            $imagePath = $uploadedImagePath;
         }
 
-        try {
-            DB::transaction(function () use (
-                $validated,
-                $imagePath,
-                $request
-            ) {
-                /*
-                 * Membuat event.
-                 */
-                $event = Event::create([
-                    'user_id' => $request->user()->id,
-                    'kategori_id' => $validated['kategori_id'],
-                    'judul' => $validated['judul'],
-                    'deskripsi' => $validated['deskripsi'],
-                    'lokasi' => $validated['lokasi'],
-                    'gambar' => $imagePath,
-                    'tanggal_waktu' => $validated['tanggal_waktu'],
+        DB::transaction(function () use (
+            $validated,
+            $imagePath,
+            $request
+        ) {
+            $event = Event::create([
+                'user_id' => $request->user()->id,
+                'kategori_id' => $validated['kategori_id'],
+                'judul' => $validated['judul'],
+                'deskripsi' => $validated['deskripsi'],
+                'lokasi' => $validated['lokasi'],
+                'gambar' => $imagePath,
+                'tanggal_waktu' => $validated['tanggal_waktu'],
+            ]);
+
+            foreach ($validated['tikets'] as $ticketData) {
+                $event->tikets()->create([
+                    'tipe' => $ticketData['tipe'],
+                    'harga' => $ticketData['harga'],
+                    'stok' => $ticketData['stok'],
                 ]);
-
-                /*
-                 * Membuat seluruh tiket yang berasal dari
-                 * dynamic ticket form.
-                 */
-                foreach ($validated['tikets'] as $ticketData) {
-                    $event->tikets()->create(
-                        $this->ticketPayload($ticketData)
-                    );
-                }
-            });
-        } catch (Throwable $exception) {
-            /*
-             * Jika database gagal menyimpan, hapus file yang
-             * baru saja diunggah agar tidak menjadi file yatim.
-             */
-            if ($uploadedImagePath) {
-                Storage::disk('public')->delete(
-                    $uploadedImagePath
-                );
             }
-
-            report($exception);
-
-            return back()
-                ->withInput()
-                ->with(
-                    'error',
-                    'Event gagal disimpan. Silakan coba kembali.'
-                );
-        }
+        });
 
         return redirect()
             ->route('admin.events.index')
@@ -295,22 +266,36 @@ class EventController extends Controller
          * Sesuai ketentuan tugas, tiket tidak boleh dihapus
          * jika event sudah memiliki penjualan.
          */
-        if (
-            $hasSales &&
-            $removedTicketIds->isNotEmpty()
-        ) {
+        /*
+        * Cari tiket yang hendak dihapus tetapi sudah digunakan
+        * pada transaksi.
+        */
+        $protectedRemovedTicketIds = collect();
+
+        if ($removedTicketIds->isNotEmpty()) {
+            $protectedRemovedTicketIds = $event
+                ->tikets()
+                ->whereKey($removedTicketIds->all())
+                ->whereHas('detailOrders')
+                ->pluck('id');
+        }
+
+        if ($protectedRemovedTicketIds->isNotEmpty()) {
             return back()
                 ->withInput()
                 ->withErrors([
                     'tikets' =>
-                        'Tiket lama tidak dapat dihapus karena event sudah memiliki penjualan.',
+                        'Tiket yang sudah terjual tidak dapat dihapus.',
                 ]);
         }
 
         $oldImagePath = $event->gambar;
-        $newImagePath = null;
+        $newImagePath = $oldImagePath;
 
-        if ($request->hasFile('gambar')) {
+        if (
+            $request->hasFile('gambar') &&
+            $request->file('gambar')->isValid()
+        ) {
             $newImagePath = $request
                 ->file('gambar')
                 ->store('events', 'public');
@@ -334,7 +319,7 @@ class EventController extends Controller
                     'judul' => $validated['judul'],
                     'deskripsi' => $validated['deskripsi'],
                     'lokasi' => $validated['lokasi'],
-                    'gambar' => $newImagePath ?? $oldImagePath,
+                    'gambar' => $newImagePath,
                     'tanggal_waktu' => $validated['tanggal_waktu'],
                 ]);
 
@@ -366,15 +351,14 @@ class EventController extends Controller
                  * Hapus tiket yang dihilangkan dari form
                  * hanya ketika event belum mempunyai penjualan.
                  */
-                if (
-                    !$hasSales &&
-                    $removedTicketIds->isNotEmpty()
-                ) {
+                /*
+                * Hapus tiket yang dihilangkan dari form.
+                * Tiket yang sudah terjual telah diblokir sebelumnya.
+                */
+                if ($removedTicketIds->isNotEmpty()) {
                     $event
                         ->tikets()
-                        ->whereKey(
-                            $removedTicketIds->all()
-                        )
+                        ->whereKey($removedTicketIds->all())
                         ->delete();
                 }
             });
