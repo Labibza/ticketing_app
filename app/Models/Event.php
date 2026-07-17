@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Event extends Model
 {
@@ -17,6 +18,7 @@ class Event extends Model
     protected $fillable = [
         'user_id',
         'kategori_id',
+        'lokasi_id',
         'judul',
         'deskripsi',
         'lokasi',
@@ -51,6 +53,21 @@ class Event extends Model
     public function kategori()
     {
         return $this->belongsTo(Kategori::class);
+    }
+
+    /**
+     * Event menggunakan satu data lokasi.
+     *
+     * Nama method dibuat lokasiData karena tabel events
+     * masih mempunyai kolom lama bernama lokasi.
+     */
+    public function lokasiData(): BelongsTo
+    {
+        return $this->belongsTo(
+            Lokasi::class,
+            'lokasi_id',
+            'id'
+        );
     }
 
     /**

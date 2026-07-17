@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Lokasi extends Model
 {
@@ -22,6 +23,18 @@ class Lokasi extends Model
         'nama_lokasi',
         'aktif',
     ];
+
+    /**
+     * Lokasi dapat digunakan oleh banyak event.
+     */
+    public function events(): HasMany
+    {
+        return $this->hasMany(
+            Event::class,
+            'lokasi_id',
+            'id'
+        );
+    }
 
     /**
      * Scope untuk mengambil lokasi yang aktif.

@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use App\Models\Event;
+use Illuminate\Validation\Rule;
 
 class EventFormRequest extends FormRequest
 {
@@ -55,10 +56,19 @@ class EventFormRequest extends FormRequest
                 'string',
             ],
 
-            'lokasi' => [
+            'lokasi_id' => [
                 'required',
-                'string',
-                'max:255',
+                'integer',
+
+                Rule::exists(
+                    'lokasi',
+                    'id'
+                )->where(
+                    fn ($query) => $query->where(
+                        'aktif',
+                        'Y'
+                    )
+                ),
             ],
 
             'kategori_id' => [
@@ -220,6 +230,21 @@ class EventFormRequest extends FormRequest
 
             'tikets.*.stok.min' =>
                 'Stok tiket tidak boleh kurang dari 0.',
+
+             /*
+            |--------------------------------------------------------------------------
+            | Pesan validasi lokasi
+            |--------------------------------------------------------------------------
+            */
+
+            'lokasi_id.required' =>
+                'Lokasi event wajib dipilih.',
+
+            'lokasi_id.integer' =>
+                'Data lokasi tidak valid.',
+
+            'lokasi_id.exists' =>
+                'Lokasi yang dipilih tidak tersedia atau sudah tidak aktif.',
         ];
     }
 

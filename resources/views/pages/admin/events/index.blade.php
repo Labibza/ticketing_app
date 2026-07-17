@@ -332,11 +332,20 @@
 
                                     <!-- Location -->
                                     <td>
-                                        <div class="max-w-48">
-                                            <p class="line-clamp-2">
-                                                {{ $event->lokasi }}
-                                            </p>
+                                        <div class="font-medium">
+                                            {{ $event->lokasiData?->nama_lokasi
+                                                ?? $event->lokasi
+                                                ?? '-' }}
                                         </div>
+
+                                        @if (
+                                            $event->lokasiData &&
+                                            $event->lokasiData->aktif === 'N'
+                                        )
+                                            <span class="badge badge-warning badge-sm">
+                                                Tidak Aktif
+                                            </span>
+                                        @endif
                                     </td>
 
                                     <!-- Status -->

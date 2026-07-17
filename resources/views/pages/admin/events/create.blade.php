@@ -147,31 +147,43 @@
                         </div>
 
                         {{-- Lokasi --}}
-                        <div class="space-y-2">
-                            <label for="lokasi" class="block">
-                                <span class="text-sm font-medium">
-                                    Lokasi
+                        <div class="form-control">
+                            <label
+                                for="lokasi_id"
+                                class="label"
+                            >
+                                <span class="label-text font-semibold">
+                                    Lokasi Event
                                 </span>
-
-                                <span class="text-error">*</span>
                             </label>
 
-                            <input
-                                type="text"
-                                id="lokasi"
-                                name="lokasi"
-                                value="{{ old('lokasi') }}"
-                                placeholder="Contoh: Marina Convention Center"
-                                class="input input-bordered w-full
-                                    @error('lokasi') input-error @enderror"
-                                maxlength="255"
+                            <select
+                                id="lokasi_id"
+                                name="lokasi_id"
+                                class="select select-bordered w-full
+                                    @error('lokasi_id') select-error @enderror"
                                 required
                             >
+                                <option value="">
+                                    Pilih lokasi
+                                </option>
 
-                            @error('lokasi')
-                                <p class="text-error text-sm">
+                                @foreach ($lokasis as $lokasi)
+                                    <option
+                                        value="{{ $lokasi->id }}"
+                                        @selected(
+                                            old('lokasi_id') == $lokasi->id
+                                        )
+                                    >
+                                        {{ $lokasi->nama_lokasi }}
+                                    </option>
+                                @endforeach
+                            </select>
+
+                            @error('lokasi_id')
+                                <span class="mt-1 text-sm text-error">
                                     {{ $message }}
-                                </p>
+                                </span>
                             @enderror
                         </div>
 

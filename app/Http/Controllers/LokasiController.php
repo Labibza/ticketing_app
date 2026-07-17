@@ -121,6 +121,15 @@ class LokasiController extends Controller
     public function destroy(
         Lokasi $lokasi
     ): RedirectResponse {
+        if ($lokasi->events()->exists()) {
+            return redirect()
+                ->route('admin.lokasi.index')
+                ->with(
+                    'error',
+                    'Lokasi tidak dapat dihapus karena sedang digunakan oleh event.'
+                );
+        }
+
         $lokasi->delete();
 
         return redirect()
