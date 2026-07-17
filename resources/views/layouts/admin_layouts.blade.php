@@ -72,6 +72,18 @@
                             Manajemen Kategori
                         </a>
                     </li>
+                    <li>
+                        <a
+                            href="{{ route('admin.lokasi.index') }}"
+                            class="{{ request()->routeIs('admin.lokasi.*')
+                                ? 'active'
+                                : '' }}"
+                        >
+                            <span>
+                                Management Lokasi
+                            </span>
+                        </a>
+                    </li>
                 </ul>
             </div>
 
